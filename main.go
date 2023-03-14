@@ -160,5 +160,48 @@ func putTodoItem(ctx *gin.Context) {
 }
 
 func deleteTodoItem(ctx *gin.Context) {
-
+	var (
+		task   Task
+		code   int
+		status string
+		msg    string
+		data   interface{}
+	)
+	id, _ := ctx.Params.Get("id")
+	// err := db.Where("id = ?", id).Delete(Task{}).Error
+	err := db.First(&task, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			code = 404
+			status = "failed"
+			msg = fmt.Sprintf("Task '%s' not found", id)
+			data = nil
+		} else {
+			code = 500
+			status = "failed"
+			msg = fmt.Sprintf("%v", err)
+			data = nil
+		}
+	} else {
+		err = db.Delete(&task, id).Error
+		if err != nil {
+			code = 500
+			status = "failed"
+			msg = fmt.Sprintf("%v", err)
+			data = nil
+		} else {
+			code = 200
+			status = "done"
+			msg = fmt.Sprintf("Success to delete task '%s'", id)
+			data = nil
+		}
+	}
+	ctx.JSON(
+		code,
+		gin.H{
+			"status":  status,
+			"message": msg,
+			"data":    data,
+		},
+	)
 }

@@ -129,6 +129,34 @@ func TestPutTodoItemReturn500(t *testing.T) {
 
 }
 
+func TestDeleteTodoItemReturn200(t *testing.T) {
+	id := insertTask()
+	r := initRouter()
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(
+		"DELETE",
+		fmt.Sprintf("/v1/todolist/%d", id),
+		nil,
+	)
+	r.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+}
+
+func TestDeleteTodoItemReturn404(t *testing.T) {
+	id := rand.Intn(1000)
+	r := initRouter()
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(
+		"DELETE",
+		fmt.Sprintf("/v1/todolist/%d", id),
+		nil,
+	)
+	r.ServeHTTP(w, req)
+	assert.Equal(t, 404, w.Code)
+}
+
 func insertTask() int {
 	n := rand.Intn(1000)
 	db.Exec("insert into tasks (id, task_info, state) values (?, 'just test', 1)", n)
