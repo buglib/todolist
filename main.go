@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -9,7 +11,8 @@ import (
 var db *gorm.DB
 
 func main() {
-	err := initMysql()
+	dsn := "buglib:123456@tcp(localhost:3306)/todolist?charset=utf8mb4&parseTime=True&loc=Local"
+	err := initMysql(dsn)
 	if err != nil {
 		panic(err)
 	}
@@ -25,13 +28,12 @@ const (
 )
 
 type Task struct {
-	gorm.Model
-	TaskInfo string
-	State    uint
+	ID       uint   `json:"id"`
+	TaskInfo string `json:"taskInfo"`
+	State    uint   `json:"state"`
 }
 
-func initMysql() (err error) {
-	dsn := "buglib:123456@tcp(localhost:3306)/todolist?charset=utf8mb4&parseTime=True&loc=Local"
+func initMysql(dsn string) (err error) {
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	db.AutoMigrate(&Task{})
 	return
@@ -60,7 +62,29 @@ func getIndex(ctx *gin.Context) {
 }
 
 func postTodolist(ctx *gin.Context) {
-
+	var (
+		task       Task
+		statusCode int
+		respBody   interface{}
+	)
+	ctx.BindJSON(&task)
+	err := db.Create(&task).Error
+	if err != nil {
+		statusCode = 500
+		respBody = gin.H{
+			"status":  "failed",
+			"message": fmt.Sprintf("%v", err),
+			"data":    nil,
+		}
+	} else {
+		statusCode = 200
+		respBody = gin.H{
+			"status":  "done",
+			"message": "Success to create task",
+			"data":    task,
+		}
+	}
+	ctx.JSON(statusCode, respBody)
 }
 
 func getTodolist(ctx *gin.Context) {
