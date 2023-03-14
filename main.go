@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -113,7 +114,49 @@ func getTodolist(ctx *gin.Context) {
 }
 
 func putTodoItem(ctx *gin.Context) {
-
+	var (
+		task       Task
+		statusCode int
+		respBody   interface{}
+		status     string
+		msg        string
+		data       interface{}
+	)
+	id, _ := ctx.Params.Get("id")
+	err := db.First(&task).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			statusCode = 404
+			status = "failed"
+			msg = fmt.Sprintf("Task '%s' not found", id)
+			data = nil
+		} else {
+			statusCode = 500
+			status = "failed"
+			msg = fmt.Sprintf("%v", err)
+			data = nil
+		}
+	} else {
+		ctx.BindJSON(&task)
+		err = db.Save(&task).Error
+		if err != nil {
+			statusCode = 500
+			status = "failed"
+			msg = fmt.Sprintf("%v", err)
+			data = nil
+		} else {
+			statusCode = 200
+			status = "done"
+			msg = fmt.Sprintf("Success to update task '%s'", id)
+			data = task
+		}
+	}
+	respBody = gin.H{
+		"status":  status,
+		"message": msg,
+		"data":    data,
+	}
+	ctx.JSON(statusCode, respBody)
 }
 
 func deleteTodoItem(ctx *gin.Context) {

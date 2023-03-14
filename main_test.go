@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -83,6 +85,52 @@ func TestGetTodolistReturn200(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 }
 
-func insertTask() {
-	db.Exec("insert into tasks (id, task_info, state) values (2, 'just test', 1)")
+func TestPutTodoItemReturn200(t *testing.T) {
+	id := insertTask()
+	task := Task{ // 将指定的任务标记为已完成
+		ID:    uint(id),
+		State: 0,
+	}
+
+	r := initRouter()
+	w := httptest.NewRecorder()
+
+	reqBody, _ := json.Marshal(&task)
+	req, _ := http.NewRequest(
+		"PUT",
+		fmt.Sprintf("/v1/todolist/%d", id),
+		bytes.NewBuffer(reqBody),
+	)
+	r.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+}
+
+func TestPutTodoItemReturn404(t *testing.T) {
+	id := rand.Intn(1000)
+	task := Task{ // 将指定的任务标记为已完成
+		ID:    uint(id),
+		State: 0,
+	}
+
+	r := initRouter()
+	w := httptest.NewRecorder()
+
+	reqBody, _ := json.Marshal(&task)
+	req, _ := http.NewRequest(
+		"PUT",
+		fmt.Sprintf("/v1/todolist/%d", id),
+		bytes.NewBuffer(reqBody),
+	)
+	r.ServeHTTP(w, req)
+	assert.Equal(t, 404, w.Code)
+}
+
+func TestPutTodoItemReturn500(t *testing.T) {
+
+}
+
+func insertTask() int {
+	n := rand.Intn(1000)
+	db.Exec("insert into tasks (id, task_info, state) values (?, 'just test', 1)", n)
+	return n
 }
