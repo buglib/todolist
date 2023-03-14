@@ -88,7 +88,28 @@ func postTodolist(ctx *gin.Context) {
 }
 
 func getTodolist(ctx *gin.Context) {
-
+	var (
+		tasks      []Task
+		statusCode int
+		respBody   interface{}
+	)
+	err := db.Find(&tasks).Error
+	if err != nil {
+		statusCode = 500
+		respBody = gin.H{
+			"status":  "failed",
+			"message": fmt.Sprintf("%v", err),
+			"data":    nil,
+		}
+	} else {
+		statusCode = 200
+		respBody = gin.H{
+			"status":  "done",
+			"message": "Success to list all tasks",
+			"data":    tasks,
+		}
+	}
+	ctx.JSON(statusCode, respBody)
 }
 
 func putTodoItem(ctx *gin.Context) {

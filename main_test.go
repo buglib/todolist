@@ -44,6 +44,9 @@ func TestPostTodolistReturn200(t *testing.T) {
 	)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
+	// respBody := make([]byte, w.Body.Cap())
+	// w.Body.Read(respBody)
+	// fmt.Println(string(respBody))
 }
 
 func TestPostTodolistReturn500(t *testing.T) {
@@ -63,4 +66,23 @@ func TestPostTodolistReturn500(t *testing.T) {
 	)
 	r.ServeHTTP(w, req)
 	assert.Equal(t, 500, w.Code)
+}
+
+func TestGetTodolistReturn200(t *testing.T) {
+	insertTask()
+
+	r := initRouter()
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(
+		"GET",
+		"/v1/todolist",
+		nil,
+	)
+	r.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+}
+
+func insertTask() {
+	db.Exec("insert into tasks (id, task_info, state) values (2, 'just test', 1)")
 }
