@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -42,6 +44,17 @@ func initMysql(dsn string) (err error) {
 
 func initRouter() *gin.Engine {
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		//AllowOrigins:    []string{"http://localhost:3000", "http://127.0.0.1:3000"},
+		AllowMethods:    []string{"PUT", "POST", "GET", "DELETE"},
+		AllowHeaders:    []string{"Origin", "Content-Type"},
+		AllowAllOrigins: true,
+		//ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	router.LoadHTMLFiles("templates/index.html")
 	router.Static("/static", "static")
 	registerHandlers(router)
@@ -137,7 +150,6 @@ func putTodoItem(ctx *gin.Context) {
 			data = nil
 		}
 	} else {
-		ctx.BindJSON(&task)
 		err = db.Save(&task).Error
 		if err != nil {
 			statusCode = 500
