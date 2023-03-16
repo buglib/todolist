@@ -150,7 +150,10 @@ func putTodoItem(ctx *gin.Context) {
 			data = nil
 		}
 	} else {
-		err = db.Save(&task).Error
+		temp := Task{}
+		ctx.BindJSON(&temp)
+		// err = db.Save(&task).Error
+		err = db.Model(&task).Updates(map[string]interface{}{"TaskInfo": temp.TaskInfo, "State": temp.State}).Error
 		if err != nil {
 			statusCode = 500
 			status = "failed"
