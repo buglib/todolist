@@ -24,8 +24,8 @@ func main() {
 
 // 定义任务状态
 const (
-	Done = iota
-	Todo
+	Todo = iota
+	Done
 )
 
 type Task struct {

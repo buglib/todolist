@@ -52,12 +52,14 @@ func TestPostTodolistReturn200(t *testing.T) {
 }
 
 func TestPostTodolistReturn500(t *testing.T) {
+	db.Exec("insert into tasks (id, task_info, state) values (1, 'test', 0)")
+
 	r := initRouter()
 	w := httptest.NewRecorder()
 
 	task := Task{
 		ID:       1,
-		TaskInfo: "实现'POST /todolist'的单元测试",
+		TaskInfo: "test",
 		State:    Todo,
 	}
 	reqBody, _ := json.Marshal(task)
