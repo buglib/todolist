@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"todolist/domain"
 	"todolist/infra/db"
 
 	"github.com/stretchr/testify/assert"
@@ -23,7 +24,7 @@ func setUpAll() {
 	// 连接数据库，建库建表
 	dsn := "buglib:123456@tcp(localhost:3306)/todolist_test?charset=utf8mb4&parseTime=True&loc=Local"
 	db.InitMysql(dsn)
-	db.AutoMigrate(&Task{})
+	db.AutoMigrate(&domain.Task{})
 }
 
 func tearDownAll() {
@@ -35,10 +36,10 @@ func TestPostTodolistReturn200(t *testing.T) {
 	router := initRouter()
 	w := httptest.NewRecorder()
 
-	task := Task{
+	task := domain.Task{
 		ID:       1,
 		TaskInfo: "实现'POST /todolist'的单元测试",
-		State:    Todo,
+		State:    domain.Todo,
 	}
 	reqBody, _ := json.Marshal(task)
 	req, _ := http.NewRequest(
@@ -59,10 +60,10 @@ func TestPostTodolistReturn500(t *testing.T) {
 	r := initRouter()
 	w := httptest.NewRecorder()
 
-	task := Task{
+	task := domain.Task{
 		ID:       1,
 		TaskInfo: "test",
-		State:    Todo,
+		State:    domain.Todo,
 	}
 	reqBody, _ := json.Marshal(task)
 	req, _ := http.NewRequest(
@@ -91,7 +92,7 @@ func TestGetTodolistReturn200(t *testing.T) {
 
 func TestPutTodoItemReturn200(t *testing.T) {
 	id := insertTask()
-	task := Task{ // 将指定的任务标记为已完成
+	task := domain.Task{ // 将指定的任务标记为已完成
 		ID:    uint(id),
 		State: 0,
 	}
@@ -111,7 +112,7 @@ func TestPutTodoItemReturn200(t *testing.T) {
 
 func TestPutTodoItemReturn404(t *testing.T) {
 	id := rand.Intn(1000)
-	task := Task{ // 将指定的任务标记为已完成
+	task := domain.Task{ // 将指定的任务标记为已完成
 		ID:    uint(id),
 		State: 0,
 	}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"todolist/domain"
 	"todolist/infra/db"
 
 	"github.com/gin-contrib/cors"
@@ -17,22 +18,22 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&Task{})
+	db.AutoMigrate(&domain.Task{})
 	router := initRouter()
 	router.Run("0.0.0.0:8080")
 }
 
-// 定义任务状态
-const (
-	Todo = iota
-	Done
-)
+// // 定义任务状态
+// const (
+// 	Todo = iota
+// 	Done
+// )
 
-type Task struct {
-	ID       uint   `json:"id"`
-	TaskInfo string `json:"taskInfo"`
-	State    uint   `json:"state"`
-}
+// type Task struct {
+// 	ID       uint   `json:"id"`
+// 	TaskInfo string `json:"taskInfo"`
+// 	State    uint   `json:"state"`
+// }
 
 func initRouter() *gin.Engine {
 	router := gin.Default()
@@ -69,7 +70,7 @@ func getIndex(ctx *gin.Context) {
 
 func postTodolist(ctx *gin.Context) {
 	var (
-		task       Task
+		task       domain.Task
 		statusCode int
 		respBody   interface{}
 	)
@@ -95,7 +96,7 @@ func postTodolist(ctx *gin.Context) {
 
 func getTodolist(ctx *gin.Context) {
 	var (
-		tasks      []Task
+		tasks      []domain.Task
 		statusCode int
 		respBody   interface{}
 	)
@@ -120,7 +121,7 @@ func getTodolist(ctx *gin.Context) {
 
 func putTodoItem(ctx *gin.Context) {
 	var (
-		task       Task
+		task       domain.Task
 		statusCode int
 		respBody   interface{}
 		status     string
@@ -142,7 +143,7 @@ func putTodoItem(ctx *gin.Context) {
 			data = nil
 		}
 	} else {
-		temp := Task{}
+		temp := domain.Task{}
 		ctx.BindJSON(&temp)
 		// err = db.Db.Save(&task).Error
 		err = db.Db.Model(&task).Updates(map[string]interface{}{"TaskInfo": temp.TaskInfo, "State": temp.State}).Error
@@ -168,7 +169,7 @@ func putTodoItem(ctx *gin.Context) {
 
 func deleteTodoItem(ctx *gin.Context) {
 	var (
-		task   Task
+		task   domain.Task
 		code   int
 		status string
 		msg    string
