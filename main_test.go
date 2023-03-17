@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"todolist/infra/db"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -21,12 +22,13 @@ func TestMain(m *testing.M) {
 func setUpAll() {
 	// 连接数据库，建库建表
 	dsn := "buglib:123456@tcp(localhost:3306)/todolist_test?charset=utf8mb4&parseTime=True&loc=Local"
-	initMysql(dsn)
+	db.InitMysql(dsn)
+	db.AutoMigrate(&Task{})
 }
 
 func tearDownAll() {
 	// 删库删表
-	db.Exec("drop table tasks")
+	db.Db.Exec("drop table tasks")
 }
 
 func TestPostTodolistReturn200(t *testing.T) {
@@ -52,7 +54,7 @@ func TestPostTodolistReturn200(t *testing.T) {
 }
 
 func TestPostTodolistReturn500(t *testing.T) {
-	db.Exec("insert into tasks (id, task_info, state) values (1, 'test', 0)")
+	db.Db.Exec("insert into tasks (id, task_info, state) values (1, 'test', 0)")
 
 	r := initRouter()
 	w := httptest.NewRecorder()
@@ -161,6 +163,6 @@ func TestDeleteTodoItemReturn404(t *testing.T) {
 
 func insertTask() int {
 	n := rand.Intn(1000)
-	db.Exec("insert into tasks (id, task_info, state) values (?, 'just test', 1)", n)
+	db.Db.Exec("insert into tasks (id, task_info, state) values (?, 'just test', 1)", n)
 	return n
 }

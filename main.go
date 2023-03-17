@@ -4,22 +4,20 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"todolist/infra/db"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
 func main() {
 	dsn := "buglib:123456@tcp(localhost:3306)/todolist?charset=utf8mb4&parseTime=True&loc=Local"
-	err := initMysql(dsn)
+	err := db.InitMysql(dsn)
 	if err != nil {
 		panic(err)
 	}
-
+	db.AutoMigrate(&Task{})
 	router := initRouter()
 	router.Run("0.0.0.0:8080")
 }
@@ -34,12 +32,6 @@ type Task struct {
 	ID       uint   `json:"id"`
 	TaskInfo string `json:"taskInfo"`
 	State    uint   `json:"state"`
-}
-
-func initMysql(dsn string) (err error) {
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&Task{})
-	return
 }
 
 func initRouter() *gin.Engine {
@@ -82,7 +74,7 @@ func postTodolist(ctx *gin.Context) {
 		respBody   interface{}
 	)
 	ctx.BindJSON(&task)
-	err := db.Create(&task).Error
+	err := db.Db.Create(&task).Error
 	if err != nil {
 		statusCode = 500
 		respBody = gin.H{
@@ -107,7 +99,7 @@ func getTodolist(ctx *gin.Context) {
 		statusCode int
 		respBody   interface{}
 	)
-	err := db.Find(&tasks).Error
+	err := db.Db.Find(&tasks).Error
 	if err != nil {
 		statusCode = 500
 		respBody = gin.H{
@@ -136,7 +128,7 @@ func putTodoItem(ctx *gin.Context) {
 		data       interface{}
 	)
 	id, _ := ctx.Params.Get("id")
-	err := db.First(&task).Error
+	err := db.Db.First(&task).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			statusCode = 404
@@ -152,8 +144,8 @@ func putTodoItem(ctx *gin.Context) {
 	} else {
 		temp := Task{}
 		ctx.BindJSON(&temp)
-		// err = db.Save(&task).Error
-		err = db.Model(&task).Updates(map[string]interface{}{"TaskInfo": temp.TaskInfo, "State": temp.State}).Error
+		// err = db.Db.Save(&task).Error
+		err = db.Db.Model(&task).Updates(map[string]interface{}{"TaskInfo": temp.TaskInfo, "State": temp.State}).Error
 		if err != nil {
 			statusCode = 500
 			status = "failed"
@@ -183,8 +175,8 @@ func deleteTodoItem(ctx *gin.Context) {
 		data   interface{}
 	)
 	id, _ := ctx.Params.Get("id")
-	// err := db.Where("id = ?", id).Delete(Task{}).Error
-	err := db.First(&task, id).Error
+	// err := db.Db.Where("id = ?", id).Delete(Task{}).Error
+	err := db.Db.First(&task, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			code = 404
@@ -198,7 +190,7 @@ func deleteTodoItem(ctx *gin.Context) {
 			data = nil
 		}
 	} else {
-		err = db.Delete(&task, id).Error
+		err = db.Db.Delete(&task, id).Error
 		if err != nil {
 			code = 500
 			status = "failed"
