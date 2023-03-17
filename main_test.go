@@ -10,6 +10,7 @@ import (
 	"testing"
 	"todolist/domain"
 	"todolist/infra/db"
+	"todolist/ui"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -33,7 +34,7 @@ func tearDownAll() {
 }
 
 func TestPostTodolistReturn200(t *testing.T) {
-	router := initRouter()
+	router := ui.InitRouter()
 	w := httptest.NewRecorder()
 
 	task := domain.Task{
@@ -57,7 +58,7 @@ func TestPostTodolistReturn200(t *testing.T) {
 func TestPostTodolistReturn500(t *testing.T) {
 	db.Db.Exec("insert into tasks (id, task_info, state) values (1, 'test', 0)")
 
-	r := initRouter()
+	r := ui.InitRouter()
 	w := httptest.NewRecorder()
 
 	task := domain.Task{
@@ -78,7 +79,7 @@ func TestPostTodolistReturn500(t *testing.T) {
 func TestGetTodolistReturn200(t *testing.T) {
 	insertTask()
 
-	r := initRouter()
+	r := ui.InitRouter()
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest(
@@ -97,7 +98,7 @@ func TestPutTodoItemReturn200(t *testing.T) {
 		State: 0,
 	}
 
-	r := initRouter()
+	r := ui.InitRouter()
 	w := httptest.NewRecorder()
 
 	reqBody, _ := json.Marshal(&task)
@@ -117,7 +118,7 @@ func TestPutTodoItemReturn404(t *testing.T) {
 		State: 0,
 	}
 
-	r := initRouter()
+	r := ui.InitRouter()
 	w := httptest.NewRecorder()
 
 	reqBody, _ := json.Marshal(&task)
@@ -136,7 +137,7 @@ func TestPutTodoItemReturn500(t *testing.T) {
 
 func TestDeleteTodoItemReturn200(t *testing.T) {
 	id := insertTask()
-	r := initRouter()
+	r := ui.InitRouter()
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest(
@@ -150,7 +151,7 @@ func TestDeleteTodoItemReturn200(t *testing.T) {
 
 func TestDeleteTodoItemReturn404(t *testing.T) {
 	id := rand.Intn(1000)
-	r := initRouter()
+	r := ui.InitRouter()
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest(
