@@ -21,8 +21,8 @@ func InitRouter() *gin.Engine {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	router.LoadHTMLFiles("templates/index.html")
-	router.Static("/static", "static")
+	router.LoadHTMLFiles("front-end/index.html")
+	router.Static("/static", "front-end/static")
 	registerHandlers(router)
 	return router
 }

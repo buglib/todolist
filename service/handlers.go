@@ -11,7 +11,7 @@ import (
 )
 
 func GetIndex(ctx *gin.Context) {
-
+	ctx.HTML(200, "index.html", nil)
 }
 
 func PostTodolist(ctx *gin.Context) {
