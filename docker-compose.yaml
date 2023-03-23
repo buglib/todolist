@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  db:
+    # container_name: mysqld
+    image: mysql:latest
+    volumes:
+      - ./resource/db/:/docker-entrypoint-initdb.d
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=todolist
+      - MYSQL_USER=buglib
+      - MYSQL_PASSWORD=123456
+    ports:
+      - "0.0.0.0:3306:3306"
+  
+  web:
+    depends_on:
+      - db
+    build: .
+    ports:
+      - "0.0.0.0:8080:8080"
+    restart: always
+    
