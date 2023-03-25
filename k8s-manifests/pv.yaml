@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: todolist-app
+  name: mysqld-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual  # 将 PersistentVolumeClaim 的请求绑定到此 PersistentVolume
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce  # 被单节点以读写模式挂载
+  hostPath:          # 将节点上的文件或者目录挂载到Pod上
+    path: "/var/mysqld/data"

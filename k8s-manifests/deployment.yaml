@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: todolist-app
+  name: mysqld
+  labels:
+    app: mysqld
+spec:
+  selector:
+    matchLabels:
+      app: mysqld
+  template:
+    metadata:
+      labels:
+        app: mysqld
+    spec:
+      containers:
+        - name: mysqld
+          image: mysql:latest
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "123456"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysqld-volume
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysqld-volume
+          persistentVolumeClaim:
+            claimName: mysqld-pv-claim
+        
+  
