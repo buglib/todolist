@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: todolist-app
+  name: web
+  labels:
+    app: web
+spec:
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: buglib/todolist:0.4.1
+          resources:
+            requests:
+              cpu: "0.5m"
+              memory: "512Mi"
+            limits:
+              cpu: "0.5m"
+              memory: "512Mi"
+          ports:
+            - containerPort: 8080
+          command: ["/bin/todolist.exe"]
+          args: [
+            "-host", "0.0.0.0",
+            "-port", "8080",
+            "-mysqlHost", "mysqld",
+            "-mysqlPort", "3306",
+            "-userName", "buglib",
+            "-passwd", "123456",
+            "-db", "todolist"
+          ]
+        
+  

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: todolist-app
+  name: mysqld
+  labels:
+    app: mysqld
+spec:
+  selector:
+    matchLabels:
+      app: mysqld
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysqld
+    spec:
+      containers:
+        - name: mysqld
+          image: buglib/mysqld:8.0
+          # resources:
+          #   requests:
+          #     cpu: "1m"
+          #     memory: "1Gi"
+          #   limits:
+          #     cpu: "2m"
+          #     memory: "2Gi"
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-root-password
+                  key: password
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysqld-volume
+              mountPath: /var/lib/mysql
+            - name: mysqld-conf
+              mountPath: /etc/my.cnf
+            - name: mysqld-confd
+              mountPath: /etc/my.cnf.d
+      volumes:
+        - name: mysqld-volume
+          persistentVolumeClaim:
+            claimName: mysqld-pv-claim
+        - name: mysqld-conf
+          hostPath:
+            type: File
+            path: /home/ubuntu/src/todolist/resource/db/conf/my.cnf
+        - name: mysqld-confd
+          hostPath:
+            type: Directory
+            path: /home/ubuntu/src/todolist/resource/db/conf/conf.d
+        
+  

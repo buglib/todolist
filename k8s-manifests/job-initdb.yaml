@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: todolist-app
+  name: init-db
+spec:
+  template:
+    spec:
+      containers:
+        - name: init-db
+          image: buglib/mysqld:8.0
+          resources:
+            requests:
+              cpu: "0.5m"
+              memory: "512Mi"
+            limits:
+              cpu: "1m"
+              memory: "1Gi"
+          # command: [
+          #   "mysql",
+          #   "-h", "mysqld",
+          #   "-P", "3306",
+          #   "-u", "root",
+          #   "-p123456",
+          #   "<", "/var/local/mysqld/init_db.sql"
+          # ]
+          command: [
+            "bash", "-c",
+            "mysql -h mysqld -P 3306 -u root -p123456 < /var/local/mysqld/init_db.sql"
+          ]
+          volumeMounts:
+            - name: mysqld-init-scripts
+              mountPath: /var/local/mysqld/init_db.sql
+      volumes:
+      - name: mysqld-init-scripts
+        hostPath:
+          type: File
+          path: /home/ubuntu/src/todolist/resource/db/scripts/init_db.sql
+      restartPolicy: OnFailure
+  # backoffLimit: 4
