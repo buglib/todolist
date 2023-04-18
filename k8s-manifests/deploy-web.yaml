@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: buglib/todolist:0.4.1
+          image: buglib/todolist:0.4.3
           resources:
             requests:
               cpu: "0.5m"
